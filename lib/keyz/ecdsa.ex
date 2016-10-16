@@ -23,11 +23,13 @@ defmodule Keyz.ECDSA do
   """
   def public_key pem do
     [ec_params_pem, ec_private_key_pem] = :public_key.pem_decode pem
-    ec_params = :public_key.pem_entry_decode ec_params_pem
+    {:EcpkParameters, ec_params_der, _} = ec_params_pem
     ec_private_key = :public_key.pem_entry_decode ec_private_key_pem
-    ec_point = {:ECPoint, ec_private_key |> elem(4)}
-    ec_public_key = {ec_point, ec_params}
-    spki_encoded = :public_key.pem_entry_encode :SubjectPublicKeyInfo, ec_public_key
-    :public_key.pem_encode [spki_encoded]
+    public_key = ec_private_key |> elem(4)
+    oid = :pkey_cert_records.public_key_algorithm_oid :ECPoint
+    ai = {:AlgorithmIdentifier, oid, ec_params_der}
+    spki = {:SubjectPublicKeyInfo, ai, public_key}
+    spki_der = :public_key.der_encode :SubjectPublicKeyInfo, spki
+    :public_key.pem_encode [{:SubjectPublicKeyInfo, spki_der, :not_encrypted}]
   end
 end
