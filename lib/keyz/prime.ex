@@ -10,17 +10,7 @@ defmodule Keyz.Prime do
   """
   def rand_prime(bits) do
     if bits < 2, do: raise "prime size must be at least 2-bit"
-    r = rand_integer bits
-    b = 
-      case b1 = rem bits, 8 do
-        0 -> 8
-        _ -> b1
-      end
-    f = 8 - b + 2
-    rbitstr = :binary.encode_unsigned r
-    <<_ :: size(f), rest :: bitstring>> = rbitstr
-    r = bor (:binary.decode_unsigned rbitstr), 1
-    p = next_probably_prime(r)
+    p = rand_integer(bits) |> bor(1) |> next_probably_prime
     case integer_bit_size(p) do
       ^bits -> p
       _     -> rand_prime bits
@@ -83,8 +73,23 @@ defmodule Keyz.Prime do
   def miller_rabin_test n, t \\ 20
   def miller_rabin_test n, t do
     {d, s} = find_ds n
-    as = for _ <- 1..t, do: :crypto.rand_uniform 2, n
+    as = rand_a(n, t)
     not Enum.any? as, fn a -> fermat_test(a, d, s, n) end
+  end
+
+  defp rand_a(n, t) do
+    case n - 2 > t do
+      true  -> rand_a1 n, t, []
+      false -> 2..(n - 1)
+    end
+  end
+  defp rand_a1(_, 0, l), do: l
+  defp rand_a1(n, t, l) do
+    r = :crypto.rand_uniform 2, n
+    case r in l do
+      true  -> rand_a1 n, t, l
+      false -> rand_a1 n, t - 1, [r | l]
+    end
   end
 
   defp fermat_test(a, d, s, n) do
@@ -96,7 +101,6 @@ defmodule Keyz.Prime do
       _   -> fermat_test1(x, s - 1, n)
     end
   end
-
   defp fermat_test1(x, 0, n), do: x != n - 1
   defp fermat_test1(x, s, n) do
     n1 = n - 1
