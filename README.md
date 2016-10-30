@@ -1,6 +1,6 @@
 # Keyz
 
-**TODO: Add description**
+Keypair generation for RSA, DSA and ECDSA
 
 ## Installation
 
