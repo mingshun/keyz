@@ -11,21 +11,22 @@ defmodule Keyz.Prime do
   @small_primes_product Enum.reduce @small_primes, &(*/2)
 
   @doc """
-  Generates random prime of the given length in bits.
+  Generates a random prime of the given length in bits according to n Miller-Rabin tests.
   """
-  def rand_prime(bits) do
+  def rand_prime bits, n \\ 20
+  def rand_prime(bits, n) do
     if bits < 2, do: raise "prime size must be at least 2-bit"
-    p = rand_integer(bits) |> bor(1) |> next_probably_prime(bits)
+    p = rand_integer(bits) |> bor(1) |> next_probably_prime(bits, n)
     case Util.integer_bit_size(p) do
       ^bits -> p
       _     -> rand_prime bits
     end
   end
 
-  defp next_probably_prime(r, bits) do
-    case probably_prime(r) do
+  defp next_probably_prime(r, bits, n) do
+    case probably_prime(r, n) do
       true  -> r
-      false -> next_probably_prime(r + next_delta(r, bits), bits)
+      false -> next_probably_prime(r + next_delta(r, bits), bits, n)
     end
   end
 
@@ -66,12 +67,13 @@ defmodule Keyz.Prime do
   end
 
   @doc """
-  Determines whether the given integer n is a prime.
+  Determines whether the given integer x is a prime according to n Miller-Rabin tests.
   """
-  def probably_prime(n) when n < 2, do: false
-  def probably_prime(n) when rem(n, 2) == 0, do: n == 2
-  def probably_prime(n) do
-    miller_rabin_test n
+  def probably_prime x, n \\ 20
+  def probably_prime(x, _) when x < 2, do: false
+  def probably_prime(x, _) when rem(x, 2) == 0, do: x == 2
+  def probably_prime(x, n) do
+    miller_rabin_test x, n
   end
 
   @doc """
