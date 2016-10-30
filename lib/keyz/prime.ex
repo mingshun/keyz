@@ -5,22 +5,46 @@ defmodule Keyz.Prime do
 
   use Bitwise
 
+  # Small primes used to rapidly exclude some fraction of composite candidates.
+  @small_primes [3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53]
+  @small_primes_product Enum.reduce @small_primes, &(*/2)
+
   @doc """
   Generates random prime of the given length in bits.
   """
   def rand_prime(bits) do
     if bits < 2, do: raise "prime size must be at least 2-bit"
-    p = rand_integer(bits) |> bor(1) |> next_probably_prime
+    p = rand_integer(bits) |> bor(1) |> next_probably_prime(bits)
     case integer_bit_size(p) do
       ^bits -> p
       _     -> rand_prime bits
     end
   end
 
-  defp next_probably_prime(r) do
+  defp next_probably_prime(r, bits) do
     case probably_prime(r) do
       true  -> r
-      false -> next_probably_prime(r + 2)
+      false -> next_probably_prime(r + next_delta(r, bits), bits)
+    end
+  end
+
+  defp next_delta(r, bits) do
+    if bits > 6 do
+      mod = rem r, @small_primes_product
+      next_delta1 mod, 2
+    else
+      2
+    end
+  end
+  defp next_delta1(_, 1048576), do: 1048576  # 1 <<< 20
+  defp next_delta1(mod, delta) do
+    m = mod + delta
+    skip = Enum.any? @small_primes, fn 
+      prime -> rem(m, prime) == 0 and  m != prime
+    end
+    case skip do
+      true  -> next_delta1 mod, delta + 2
+      false -> delta
     end
   end
 
