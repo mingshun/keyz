@@ -4,6 +4,7 @@ defmodule Keyz.Prime do
   """
 
   use Bitwise
+  alias Keyz.Util
 
   # Small primes used to rapidly exclude some fraction of composite candidates.
   @small_primes [3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53]
@@ -15,7 +16,7 @@ defmodule Keyz.Prime do
   def rand_prime(bits) do
     if bits < 2, do: raise "prime size must be at least 2-bit"
     p = rand_integer(bits) |> bor(1) |> next_probably_prime(bits)
-    case integer_bit_size(p) do
+    case Util.integer_bit_size(p) do
       ^bits -> p
       _     -> rand_prime bits
     end
@@ -46,22 +47,6 @@ defmodule Keyz.Prime do
       true  -> next_delta1 mod, delta + 2
       false -> delta
     end
-  end
-
-  defp integer_bit_size(x) do
-    bitstr = :binary.encode_unsigned x
-    <<first_byte :: size(8), _ :: bitstring>> = bitstr
-    f = case :binary.encode_unsigned(first_byte) do
-      <<1 :: size(1), _ :: bitstring>> -> 8
-      <<1 :: size(2), _ :: bitstring>> -> 7
-      <<1 :: size(3), _ :: bitstring>> -> 6
-      <<1 :: size(4), _ :: bitstring>> -> 5
-      <<1 :: size(5), _ :: bitstring>> -> 4
-      <<1 :: size(6), _ :: bitstring>> -> 3
-      <<1 :: size(7), _ :: bitstring>> -> 2
-      <<1 :: size(8), _ :: bitstring>> -> 1
-    end
-    bit_size(bitstr) - (8 - f)
   end
 
   @doc """
