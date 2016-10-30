@@ -82,8 +82,6 @@ defmodule Keyz.Prime do
 
   @doc """
   Determines whether the given integer n is a prime.
-  If x is prime, it returns true. 
-  If x is not prime, it returns false with probability at least 1 - ¼ⁿ.
   """
   def probably_prime(n) when n < 2, do: false
   def probably_prime(n) when rem(n, 2) == 0, do: n == 2
@@ -92,13 +90,15 @@ defmodule Keyz.Prime do
   end
 
   @doc """
-  Performs t Miller-Rabin tests to check whether n is prime.
+  Performs n Miller-Rabin tests to check whether x is prime.
+  If x is prime, it returns true.
+  If x is not prime, it returns false with probability at least 1 - ¼ⁿ.
   """
-  def miller_rabin_test n, t \\ 20
-  def miller_rabin_test n, t do
-    {d, s} = find_ds n
-    as = rand_a(n, t)
-    not Enum.any? as, fn a -> fermat_test(a, d, s, n) end
+  def miller_rabin_test x, n \\ 20
+  def miller_rabin_test x, n do
+    {d, s} = find_ds x
+    as = rand_a(x, n)
+    not Enum.any? as, fn a -> fermat_test(a, d, s, x) end
   end
 
   defp rand_a(n, t) do
