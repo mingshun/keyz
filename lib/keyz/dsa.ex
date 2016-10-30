@@ -16,6 +16,9 @@ defmodule Keyz.DSA do
   @doc """
   Generates DSA key with the given parameter sizes.
   """
+  @spec generate :: String.t
+  @spec generate(pos_integer) :: String.t
+  @spec generate(pos_integer, pos_integer) :: String.t
   def generate l \\ 2048, n \\ 256 do
     {p, q} = calculate_p_q l, n
     g = find_g p, q
@@ -69,6 +72,7 @@ defmodule Keyz.DSA do
   @doc """
   Returns public key in PEM binary corresponding to the given DSA key PEM binary.
   """
+  @spec public_key(String.t) :: String.t
   def public_key pem do
     [private_key_pem] = :public_key.pem_decode pem
     private_key = :public_key.pem_entry_decode private_key_pem

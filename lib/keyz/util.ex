@@ -6,6 +6,7 @@ defmodule Keyz.Util do
   @doc """
   Calculates the bit size of the given integer.
   """
+  @spec integer_bit_size(pos_integer) :: pos_integer
   def integer_bit_size(x) do
     bitstr = :binary.encode_unsigned x
     <<first_byte :: size(8), _ :: bitstring>> = bitstr
@@ -25,9 +26,11 @@ defmodule Keyz.Util do
   @doc """
   Computes GCD of the given x and y.
   """
+  @spec gcd(integer, integer) :: integer
   def gcd(x, 0), do: x
   def gcd(x, y), do: gcd y, rem(x, y)
 
+  @spec extended_gcd(integer, integer) :: {integer, integer}
   def extended_gcd(a, b) do
     {last_remainder, last_x} = extended_gcd(abs(a), abs(b), 1, 0, 0, 1)
     {last_remainder, last_x * (if a < 0, do: -1, else: 1)}
@@ -43,6 +46,7 @@ defmodule Keyz.Util do
   @doc """
   Computes the inverse of e modulo et
   """
+  @spec mod_inverse(integer, integer) :: integer
   def mod_inverse(e, et) do
     {g, x} = extended_gcd(e, et)
     if g != 1, do: raise "The maths are broken!"

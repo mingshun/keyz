@@ -14,6 +14,9 @@ defmodule Keyz.RSA do
   @doc """
   Generates RSA key with the given curve id, and returns in PEM binary.
   """
+  @spec generate :: String.t
+  @spec generate(pos_integer) :: String.t
+  @spec generate(pos_integer, pos_integer) :: String.t
   def generate bits \\ 2048, e \\ @f4 do
     {p, q, n} = generate_pq bits
 
@@ -55,6 +58,7 @@ defmodule Keyz.RSA do
   @doc """
   Returns public key in PEM binary corresponding to the given RSA key PEM binary.
   """
+  @spec public_key(String.t) :: String.t
   def public_key pem do
     [private_key_pem] = :public_key.pem_decode pem
     private_key = :public_key.pem_entry_decode private_key_pem

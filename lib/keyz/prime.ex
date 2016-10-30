@@ -13,6 +13,8 @@ defmodule Keyz.Prime do
   @doc """
   Generates a random prime of the given length in bits according to n Miller-Rabin tests.
   """
+  @spec rand_prime(pos_integer) :: pos_integer
+  @spec rand_prime(pos_integer, pos_integer) :: pos_integer
   def rand_prime bits, n \\ 20
   def rand_prime(bits, n) do
     if bits < 2, do: raise "prime size must be at least 2-bit"
@@ -53,6 +55,7 @@ defmodule Keyz.Prime do
   @doc """
   Generates random integer of the given length in bits.
   """
+  @spec rand_integer(pos_integer) :: pos_integer
   def rand_integer(bits) when bits > 0 do
     bytes = div bits + 7, 8
     r = :crypto.strong_rand_bytes bytes
@@ -69,6 +72,8 @@ defmodule Keyz.Prime do
   @doc """
   Determines whether the given integer x is a prime according to n Miller-Rabin tests.
   """
+  @spec probably_prime(pos_integer) :: boolean
+  @spec probably_prime(pos_integer, pos_integer) :: boolean
   def probably_prime x, n \\ 20
   def probably_prime(x, _) when x < 2, do: false
   def probably_prime(x, _) when rem(x, 2) == 0, do: x == 2
@@ -81,6 +86,8 @@ defmodule Keyz.Prime do
   If x is prime, it returns true.
   If x is not prime, it returns false with probability at least 1 - ¼ⁿ.
   """
+  @spec miller_rabin_test(pos_integer) :: boolean
+  @spec miller_rabin_test(pos_integer, pos_integer) :: boolean
   def miller_rabin_test x, n \\ 20
   def miller_rabin_test x, n do
     {d, s} = find_ds x
@@ -129,6 +136,7 @@ defmodule Keyz.Prime do
   @doc """
   Calculates modular power.
   """
+  @spec pow_mod(integer, pos_integer, pos_integer) :: integer
   def pow_mod(a, p, m) when p > 0 and m > 0 do
     pb = Integer.digits p, 2
     pow_mod1 a, pb, m, 1
