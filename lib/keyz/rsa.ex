@@ -6,9 +6,9 @@ defmodule Keyz.RSA do
   alias Keyz.Prime
   alias Keyz.Util
 
-  # The public exponent value F0 = 3
+  ### The public exponent value F0 = 3
   @f0 0x3
-  # The public exponent value F4 = 65537
+  ### The public exponent value F4 = 65537
   @f4 0x10001
 
   @doc """
@@ -50,6 +50,22 @@ defmodule Keyz.RSA do
       true  -> {p, q, n}
       false -> {q, p, n}
     end
+  end
+
+  @doc """
+  Returns public key in PEM binary corresponding to the given RSA key PEM binary.
+  """
+  def public_key pem do
+    [private_key_pem] = :public_key.pem_decode pem
+    private_key = :public_key.pem_entry_decode private_key_pem
+    {:RSAPrivateKey, _, n, e, _, _, _, _, _, _, _} = private_key
+    public_key = {:RSAPublicKey, n, e}
+    public_key_der = :public_key.der_encode :RSAPublicKey, public_key
+    oid = :pkey_cert_records.public_key_algorithm_oid :RSAPublicKey
+    ai = {:AlgorithmIdentifier, oid, :pkey_cert_records.der_null}
+    spki = {:SubjectPublicKeyInfo, ai, public_key_der}
+    spki_der = :public_key.der_encode :SubjectPublicKeyInfo, spki
+    :public_key.pem_encode [{:SubjectPublicKeyInfo, spki_der, :not_encrypted}]
   end
 
 end
