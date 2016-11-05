@@ -25,8 +25,7 @@ defmodule Keyz.DSA do
     x = find_x q
     y = Prime.pow_mod g, x, p
     private_key = {:DSAPrivateKey, 0, p, q, g, y, x}
-    private_key_der = :public_key.der_encode :DSAPrivateKey, private_key
-    :public_key.pem_encode [{:DSAPrivateKey, private_key_der, :not_encrypted}]
+    Util.asn1_records_to_pem [{:DSAPrivateKey, private_key}]
   end
 
   defp calculate_p_q l, n do
@@ -83,7 +82,6 @@ defmodule Keyz.DSA do
     oid = :pkey_cert_records.public_key_algorithm_oid :DSAPublicKey
     ai = {:AlgorithmIdentifier, oid, dss_parms_der}
     spki = {:SubjectPublicKeyInfo, ai, public_key_der}
-    spki_der = :public_key.der_encode :SubjectPublicKeyInfo, spki
-    :public_key.pem_encode [{:SubjectPublicKeyInfo, spki_der, :not_encrypted}]
+    Util.asn1_records_to_pem [{:SubjectPublicKeyInfo, spki}]
   end
 end

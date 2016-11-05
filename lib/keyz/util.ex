@@ -30,6 +30,9 @@ defmodule Keyz.Util do
   def gcd(x, 0), do: x
   def gcd(x, y), do: gcd y, rem(x, y)
 
+  @doc """
+  Computes extended GCD of the given a and b.
+  """
   @spec extended_gcd(integer, integer) :: {integer, integer}
   def extended_gcd(a, b) do
     {last_remainder, last_x} = extended_gcd(abs(a), abs(b), 1, 0, 0, 1)
@@ -44,7 +47,7 @@ defmodule Keyz.Util do
   end
  
   @doc """
-  Computes the inverse of e modulo et
+  Computes the inverse of e modulo et.
   """
   @spec mod_inverse(integer, integer) :: integer
   def mod_inverse(e, et) do
@@ -53,4 +56,14 @@ defmodule Keyz.Util do
     rem(x+et, et)
   end
 
+  @doc """
+  Encodes ASN.1 records to pem binary.
+  """
+  @spec asn1_records_to_pem(list({atom, any})) :: String.t
+  def asn1_records_to_pem records do
+    ders = records 
+           |> Enum.map(fn {name, record} -> {name, :public_key.der_encode(name, record)} end)
+           |> Enum.map(fn {name, der} -> {name, der, :not_encrypted} end)
+    :public_key.pem_encode ders
+  end
 end

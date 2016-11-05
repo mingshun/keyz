@@ -3,6 +3,8 @@ defmodule Keyz.ECDSA do
   Module to generate ECDSA keys.
   """
 
+  alias Keyz.Util
+
   @doc """
   Generates ECDSA key with the given curve id, and returns in PEM binary.
   """
@@ -11,11 +13,9 @@ defmodule Keyz.ECDSA do
     {public_key, private_key} = :crypto.generate_key :ecdh, curve_id
     ec_params = {:namedCurve, :pubkey_cert_records.namedCurves(curve_id)}
     ec_private_key = {:ECPrivateKey, 1, private_key, ec_params, public_key}
-    ec_params_der = :public_key.der_encode :EcpkParameters, ec_params
-    ec_private_key_der = :public_key.der_encode :ECPrivateKey, ec_private_key
-    :public_key.pem_encode [
-      {:EcpkParameters, ec_params_der, :not_encrypted},
-      {:ECPrivateKey, ec_private_key_der, :not_encrypted}
+    Util.asn1_records_to_pem [
+      {:EcpkParameters, ec_params},
+      {:ECPrivateKey, ec_private_key}
     ]
   end
 
@@ -31,7 +31,6 @@ defmodule Keyz.ECDSA do
     oid = :pkey_cert_records.public_key_algorithm_oid :ECPoint
     ai = {:AlgorithmIdentifier, oid, ec_params_der}
     spki = {:SubjectPublicKeyInfo, ai, public_key}
-    spki_der = :public_key.der_encode :SubjectPublicKeyInfo, spki
-    :public_key.pem_encode [{:SubjectPublicKeyInfo, spki_der, :not_encrypted}]
+    Util.asn1_records_to_pem [{:SubjectPublicKeyInfo, spki}]
   end
 end

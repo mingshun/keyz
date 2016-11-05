@@ -38,8 +38,7 @@ defmodule Keyz.RSA do
     coeff = Util.mod_inverse q, p
 
     private_key = {:RSAPrivateKey, :"two-prime", n, e, d, p, q, pe, qe, coeff, :asn1_NOVALUE}
-    private_key_der = :public_key.der_encode :RSAPrivateKey, private_key
-    :public_key.pem_encode [{:RSAPrivateKey, private_key_der, :not_encrypted}]
+    Util.asn1_records_to_pem [{:RSAPrivateKey, private_key}]
   end
 
   defp generate_pq bits do
@@ -68,8 +67,7 @@ defmodule Keyz.RSA do
     oid = :pkey_cert_records.public_key_algorithm_oid :RSAPublicKey
     ai = {:AlgorithmIdentifier, oid, :pkey_cert_records.der_null}
     spki = {:SubjectPublicKeyInfo, ai, public_key_der}
-    spki_der = :public_key.der_encode :SubjectPublicKeyInfo, spki
-    :public_key.pem_encode [{:SubjectPublicKeyInfo, spki_der, :not_encrypted}]
+    Util.asn1_records_to_pem [{:SubjectPublicKeyInfo, spki}]
   end
 
 end
