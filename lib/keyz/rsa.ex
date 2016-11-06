@@ -12,7 +12,45 @@ defmodule Keyz.RSA do
   @f4 0x10001
 
   @doc """
-  Generates RSA key with the given curve id, and returns in PEM binary.
+  Generates RSA key with the given bit size and public exponent.
+  """
+  @spec generate_private_key :: any
+  @spec generate_private_key(pos_integer) :: any
+  @spec generate_private_key(pos_integer, pos_integer) :: any
+  def generate_private_key bits \\ 2048, e \\ @f4 do
+    {p, q, n} = generate_pq bits
+
+    # phi = (p - 1) * (q - 1) must be relative prime to e, otherwise RSA just won't work.
+    p1 = p - 1
+    q1 = q - 1
+    phi = p1 * q1
+    if Util.gcd(e, phi) != 1, do: generate bits, e
+
+    # Private exponent d is the inverse of e mod phi.
+    d = Util.mod_inverse e, phi
+
+    # 1st prime exponent pe = d mod (p - 1)
+    pe = rem d, p1
+    # 2nd prime exponent qe = d mod (q - 1)
+    qe = rem d, q1
+
+    # Certificate coefficient coeff is the inverse of q mod p.
+    coeff = Util.mod_inverse q, p
+
+    {:RSAPrivateKey, :"two-prime", n, e, d, p, q, pe, qe, coeff, :asn1_NOVALUE}
+  end
+
+  @doc """
+  Returns the public key corresponding the given RSA private key.
+  """
+  def public_key_of private_key do
+    {:RSAPrivateKey, _, n, e, _, _, _, _, _, _, _} = private_key
+    {:RSAPublicKey, n, e}
+  end
+
+  # Deprecated
+  @doc """
+  Generates RSA key with the given bit size and public exponent, and returns in PEM binary.
   """
   @spec generate :: String.t
   @spec generate(pos_integer) :: String.t
@@ -54,6 +92,7 @@ defmodule Keyz.RSA do
     end
   end
 
+  # Deprecated
   @doc """
   Returns public key in PEM binary corresponding to the given RSA key PEM binary.
   """

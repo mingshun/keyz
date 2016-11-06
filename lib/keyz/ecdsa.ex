@@ -6,6 +6,25 @@ defmodule Keyz.ECDSA do
   alias Keyz.Util
 
   @doc """
+  Generates ECDSA private key with the given curve id.
+  """
+  def generate_private_key curve_id do
+    {public_key, private_key} = :crypto.generate_key :ecdh, curve_id
+    ec_params = {:namedCurve, :pubkey_cert_records.namedCurves(curve_id)}
+    {:ECPrivateKey, 1, private_key, ec_params, public_key}
+  end
+
+  @doc """
+  Returns the public key corresponding the given ECDSA private key.
+  """
+  def public_key_of private_key do
+    {:ECPrivateKey, _, _, ec_params, public_key} = private_key
+    ec_point = {:ECPoint, public_key}
+    {ec_point, ec_params}
+  end
+
+  # Deprecated
+  @doc """
   Generates ECDSA key with the given curve id, and returns in PEM binary.
   """
   @spec generate(any) :: String.t
@@ -19,6 +38,7 @@ defmodule Keyz.ECDSA do
     ]
   end
 
+  # Deprecated
   @doc """
   Returns public key in PEM binary corresponding to the given ECDSA key PEM binary.
   """

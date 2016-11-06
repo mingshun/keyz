@@ -46,12 +46,9 @@ defmodule Keyz.RSATest do
   -----END PUBLIC KEY-----
   """
 
-  test "generate" do
-    pem = RSA.generate
-    [private_key_pem] = :public_key.pem_decode pem
-    private_key = :public_key.pem_entry_decode private_key_pem
-    {:RSAPrivateKey, _, n, e, _, _, _, _, _, _, _} = private_key
-    public_key = {:RSAPublicKey, n, e}
+  test "generate keypair" do
+    private_key = RSA.generate_private_key 1024
+    public_key = RSA.public_key_of private_key
 
     msg = :crypto.strong_rand_bytes 32
     signature = :public_key.sign msg, :sha256, private_key

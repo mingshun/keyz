@@ -64,12 +64,9 @@ defmodule Keyz.DSATest do
   -----END PUBLIC KEY-----
   """
 
-  test "generate" do
-    pem = DSA.generate
-    [private_key_pem] = :public_key.pem_decode pem
-    private_key = :public_key.pem_entry_decode private_key_pem
-    {:DSAPrivateKey, 0, p, q, g, y, _} = private_key
-    public_key = {y, {:'Dss-Parms', p, q, g}}
+  test "generate keypair" do
+    private_key = DSA.generate_private_key 1024, 160
+    public_key = DSA.public_key_of private_key
 
     msg = :crypto.strong_rand_bytes 32
     signature = :public_key.sign msg, :sha, private_key

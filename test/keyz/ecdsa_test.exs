@@ -24,17 +24,13 @@ defmodule Keyz.ECDSATest do
   ### openssl ec -in ecdsa.pem -pubout -outform der | openssl sha1 -c
   @test_fingerprint "82:33:e6:34:af:d4:0a:97:4f:f4:8a:82:69:0d:22:cb:d6:7e:02:be"
 
-  test "generate" do
-    pem = ECDSA.generate :secp256k1
-    [ec_params_pem, ec_private_key_pem] = :public_key.pem_decode pem
-    ec_params = :public_key.pem_entry_decode ec_params_pem
-    ec_private_key = :public_key.pem_entry_decode ec_private_key_pem
-    ec_point = {:ECPoint, ec_private_key |> elem(4)}
-    ec_public_key = {ec_point, ec_params}
+  test "generate keypair" do
+    private_key = ECDSA.generate_private_key :secp256k1
+    public_key = ECDSA.public_key_of private_key
 
     msg = :crypto.strong_rand_bytes 32
-    signature = :public_key.sign msg, :sha256, ec_private_key
-    verify = :public_key.verify msg, :sha256, signature, ec_public_key
+    signature = :public_key.sign msg, :sha256, private_key
+    verify = :public_key.verify msg, :sha256, signature, public_key
     assert verify
   end
 

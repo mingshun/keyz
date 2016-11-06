@@ -16,6 +16,29 @@ defmodule Keyz.DSA do
   @doc """
   Generates DSA key with the given parameter sizes.
   """
+  @spec generate :: any
+  @spec generate(pos_integer) :: any
+  @spec generate(pos_integer, pos_integer) :: any
+  def generate_private_key l \\ 2048, n \\ 256 do
+    {p, q} = calculate_p_q l, n
+    g = find_g p, q
+    x = find_x q
+    y = Prime.pow_mod g, x, p
+    {:DSAPrivateKey, 0, p, q, g, y, x}
+  end
+
+  @doc """
+  Returns the public key corresponding the given DSA private key.
+  """
+  def public_key_of private_key do
+    {:DSAPrivateKey, 0, p, q, g, y, _} = private_key
+    {y, {:'Dss-Parms', p, q, g}}
+  end
+
+  # Deprecated
+  @doc """
+  Generates DSA key with the given parameter sizes.
+  """
   @spec generate :: String.t
   @spec generate(pos_integer) :: String.t
   @spec generate(pos_integer, pos_integer) :: String.t
@@ -68,6 +91,7 @@ defmodule Keyz.DSA do
     end
   end
 
+  # Deprecated
   @doc """
   Returns public key in PEM binary corresponding to the given DSA key PEM binary.
   """
